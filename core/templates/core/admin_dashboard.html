@@ -1,0 +1,329 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="mb-4 animate-fade-in">
+    <h2 class="fw-bold text-dark mb-1">Panel Administracyjny</h2>
+    <p class="text-muted">Zarządzaj strukturą szkoły i użytkownikami.</p>
+</div>
+
+<div class="row g-4 mb-5 animate-fade-in">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-3 bg-primary bg-opacity-10 p-3 me-3"><i class="bi bi-people text-primary fs-3"></i></div>
+                <div><h6 class="text-muted small fw-bold mb-1">UCZNIOWIE</h6><h4 class="fw-bold mb-0">{{ stats.total_students }}</h4></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-3 bg-success bg-opacity-10 p-3 me-3"><i class="bi bi-person-badge text-success fs-3"></i></div>
+                <div><h6 class="text-muted small fw-bold mb-1">NAUCZYCIELE</h6><h4 class="fw-bold mb-0">{{ stats.total_teachers }}</h4></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-3 bg-warning bg-opacity-10 p-3 me-3"><i class="bi bi-door-open text-warning fs-3"></i></div>
+                <div><h6 class="text-muted small fw-bold mb-1">KLASY</h6><h4 class="fw-bold mb-0">{{ stats.total_classes }}</h4></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-3 bg-info bg-opacity-10 p-3 me-3"><i class="bi bi-book text-info fs-3"></i></div>
+                <div><h6 class="text-muted small fw-bold mb-1">PRZEDMIOTY</h6><h4 class="fw-bold mb-0">{{ stats.total_subjects }}</h4></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content" id="sidebarTabContent">
+
+    <div class="tab-pane fade show active" id="dashboard-pane" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white fw-bold text-dark">Dodaj Klasę / Przedmiot</div>
+                    <div class="card-body">
+                        <form method="post" class="mb-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="add_class">
+                            <label class="small fw-bold text-muted mb-1">Nowa Klasa (np. 1A)</label>
+                            <div class="input-group">
+                                {{ class_form.name }}
+                                <button class="btn btn-primary px-4">Dodaj</button>
+                            </div>
+                            {% if class_form.name.errors %}
+                            <div class="text-danger small mt-1 fw-bold">{{ class_form.name.errors.0 }}</div>
+                            {% endif %}
+                        </form>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="add_subject">
+                            <label class="small fw-bold text-muted mb-1">Nowy Przedmiot (min. 3 litery)</label>
+                            <div class="input-group">
+                                {{ subject_form.name }}
+                                <button class="btn btn-info text-white px-4">Dodaj</button>
+                            </div>
+                            {% if subject_form.name.errors %}
+                            <div class="text-danger small mt-1 fw-bold">{{ subject_form.name.errors.0 }}</div>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold text-dark">Aktywne Przedmioty</div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for s in subjects %}
+                            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill d-flex align-items-center shadow-sm">
+                                {{ s.name }}
+                                <a href="{% url 'delete_subject' s.id %}" class="ms-2 text-danger text-decoration-none fw-bold" onclick="return confirm('Usunąć?')">✕</a>
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold text-dark">Istniejące Klasy</div>
+                    <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                        <table class="table align-middle mb-0">
+                            <tbody>
+                                {% for c in classes %}
+                                <tr>
+                                    <td class="ps-3 fw-bold text-primary fs-5">{{ c.name }}</td>
+                                    <td class="text-end pe-3">
+                                        <span class="badge bg-light text-muted border me-2">{{ c.user_set.count }} uczniów</span>
+                                        {% if c.user_set.count == 0 %}
+                                        <a href="{% url 'delete_class' c.id %}" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash3"></i></a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="students-pane" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 mb-4 border-top border-4 border-primary">
+                    <div class="card-header bg-white py-3 fw-bold text-dark">Rejestracja Ucznia i Rodzica</div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}<input type="hidden" name="action" value="add_student_parent">
+                            <h6 class="fw-bold text-primary mb-3">Dane Ucznia</h6>
+                            <div class="custom-form-as-p">{{ student_f.as_p }}</div>
+                            <hr>
+                            <h6 class="fw-bold text-secondary mb-3">Dane Rodzica</h6>
+                            <div class="custom-form-as-p">{{ parent_f.as_p }}</div>
+                            <button type="submit" class="btn btn-primary w-100 mt-3 py-2 fw-bold shadow-sm">Zarejestruj Duet</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 mb-3 bg-light">
+                    <div class="card-body py-2">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+                            <input type="text" id="studentSearch" class="form-control border-start-0" placeholder="Wyszukiwanie (nazwisko, klasa, email)...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold text-dark">Ewidencja Uczniów</div>
+                    <div class="table-responsive table-scroll-container">
+                        <table class="table align-middle table-hover mb-0">
+                            <thead class="bg-light small fw-bold">
+                                <tr>
+                                    <th class="ps-4">Uczeń</th>
+                                    <th>Klasa</th>
+                                    <th>Opiekun</th>
+                                    <th class="text-end pe-4">Akcje</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                                {% for s in students %}
+                                <tr>
+                                    <td class="ps-4"><b>{{ s.first_name }} {{ s.last_name }}</b><br><small class="text-muted">{{ s.email }}</small></td>
+                                    <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ s.class_group.name }}</span></td>
+                                    <td>{{ s.parent.last_name }} {{ s.parent.first_name }}</td>
+                                    <td class="text-end pe-4">
+                                        <a href="{% url 'edit_student_family' s.id %}" class="btn btn-sm btn-light border"><i class="bi bi-pencil"></i></a>
+                                        <a href="{% url 'delete_student_family' s.id %}" class="btn btn-sm btn-light border text-danger" onclick="return confirm('Usunąć?')"><i class="bi bi-trash"></i></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="staff-pane" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 border-top border-4 border-success mb-4">
+                    <div class="card-header bg-white fw-bold text-success">Dodaj Nauczyciela</div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}<input type="hidden" name="action" value="add_teacher">
+                            <div class="mb-2">{{ teacher_form.first_name }}</div>
+                            <div class="mb-2">{{ teacher_form.last_name }}</div>
+                            <div class="mb-2">{{ teacher_form.email }}</div>
+                            <button class="btn btn-success w-100 fw-bold">Utwórz Konto</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card shadow-sm border-0 border-top border-4 border-warning">
+                    <div class="card-header bg-white fw-bold text-warning">Przypisz do Klasy</div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}<input type="hidden" name="action" value="assign_teacher">
+                            <div class="mb-2"><label class="small fw-bold">Nauczyciel</label>{{ assign_form.teacher }}</div>
+                            <div class="mb-2"><label class="small fw-bold">Przedmiot</label>{{ assign_form.subject }}</div>
+                            <div class="mb-2"><label class="small fw-bold">Klasa</label>{{ assign_form.class_group }}</div>
+                            <button class="btn btn-warning w-100 text-white fw-bold">Zapisz</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 mb-3 bg-light">
+                    <div class="card-body py-2">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-success"></i></span>
+                            <input type="text" id="teacherSearch" class="form-control border-start-0" placeholder="Filtruj kadrę...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold text-dark">Lista Nauczycieli</div>
+                    <div class="table-responsive table-scroll-container">
+                        <table class="table align-middle table-hover mb-0">
+                            <tbody id="teacherTableBody">
+                                {% for t in teachers %}
+                                <tr>
+                                    <td class="ps-3 py-3"><b>{{ t.last_name }} {{ t.first_name }}</b><br><small>{{ t.email }}</small></td>
+                                    <td class="text-end pe-3">
+                                        <div class="btn-group">
+                                            <a href="{% url 'teacher_details' t.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                                            <a href="{% url 'edit_teacher' t.id %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                                            <a href="{% url 'delete_teacher' t.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Usunąć?')"><i class="bi bi-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-form-as-p p input, .custom-form-as-p p select {
+        display: block;
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .custom-form-as-p label {
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f9fafb;
+        cursor: default;
+    }
+
+    /* KONTENER PRZEWIJANIA */
+    .table-scroll-container {
+        max-height: 550px; /* Maksymalna wysokość tabeli */
+        overflow-y: auto;
+    }
+
+        /* "KLEJĄCY" NAGŁÓWEK */
+        .table-scroll-container thead {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background-color: #f8f9fa !important;
+        }
+
+        /* STYLIZACJA SCROLLBARA */
+        .table-scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .table-scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .table-scroll-container::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 10px;
+        }
+
+            .table-scroll-container::-webkit-scrollbar-thumb:hover {
+                background: #ced4da;
+            }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function setupLiveSearch(inputId, tableBodyId) {
+            const input = document.getElementById(inputId);
+            const tableBody = document.getElementById(tableBodyId);
+            if (!input || !tableBody) return;
+            input.addEventListener('keyup', function () {
+                const filter = input.value.toLowerCase();
+                const rows = tableBody.getElementsByTagName('tr');
+                for (let i = 0; i < rows.length; i++) {
+                    const rowText = rows[i].textContent.toLowerCase();
+                    rows[i].style.display = rowText.includes(filter) ? "" : "none";
+                }
+            });
+        }
+
+        function setupNameRestriction() {
+            const nameInputs = document.querySelectorAll('input[name*="first_name"], input[name*="last_name"]');
+            nameInputs.forEach(input => {
+                input.addEventListener('input', function (e) {
+                    const cleanValue = this.value.replace(/[0-9!@#$%^&*()_+={}\[\]:;"'<>,.?\/\\|`~]/g, '');
+                    if (this.value !== cleanValue) { this.value = cleanValue; }
+                });
+            });
+        }
+
+        setupLiveSearch('studentSearch', 'studentTableBody');
+        setupLiveSearch('teacherSearch', 'teacherTableBody');
+        setupNameRestriction();
+    });
+</script>
+{% endblock %}

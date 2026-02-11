@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Edycja danych: {{ teacher.first_name }} {{ teacher.last_name }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{% url 'admin_dashboard' %}#staff-pane" class="btn btn-secondary">Anuluj</a>
+                        <button type="submit" class="btn btn-warning">Zapisz zmiany</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

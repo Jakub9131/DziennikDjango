@@ -1,0 +1,110 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="mb-5 animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Edycja Rodziny</h2>
+            <p class="text-muted">Aktualizujesz dane ucznia: <strong>{{ student.first_name }} {{ student.last_name }}</strong></p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}#students-pane" class="btn btn-outline-secondary px-4 rounded-pill">
+            <i class="bi bi-arrow-left me-2"></i>Powrót
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm border-top border-4 border-primary animate-fade-in">
+    <div class="card-header bg-white py-4 px-4 border-bottom">
+        <h5 class="fw-bold mb-0 text-dark">Formularz Edycji Duetu</h5>
+    </div>
+    <div class="card-body p-4">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-5">
+                <div class="col-lg-6 border-end">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="badge bg-primary rounded-circle p-2 me-2" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">1</span>
+                        <h6 class="fw-bold text-primary mb-0">Dane Ucznia</h6>
+                    </div>
+                    <div class="ps-2 custom-form-as-p">
+                        {{ s_form.as_p }}
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="badge bg-secondary rounded-circle p-2 me-2" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">2</span>
+                        <h6 class="fw-bold text-secondary mb-0">Dane Rodzica</h6>
+                    </div>
+                    <div class="ps-2 custom-form-as-p">
+                        {% if p_form %}
+                        {{ p_form.as_p }}
+                        {% else %}
+                        <div class="alert alert-warning border-0 shadow-sm">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Ten uczeń nie posiada przypisanego rodzica w systemie.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-4 border-top d-flex justify-content-end gap-2">
+                <a href="{% url 'admin_dashboard' %}#students-pane" class="btn btn-light px-4 border text-muted">Anuluj</a>
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold shadow-sm">ZAPISZ ZMIANY</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Stylowanie formularzy generowanych przez as_p dla spójności z dashboardem */
+    .custom-form-as-p p label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin-bottom: 0.4rem;
+    }
+
+    .custom-form-as-p p input,
+    .custom-form-as-p p select {
+        display: block;
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+        font-size: 0.95rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        margin-bottom: 1.2rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .custom-form-as-p p input:focus {
+            border-color: var(--laravel-indigo);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+
+    .custom-form-as-p .errorlist {
+        list-style: none;
+        padding: 0;
+        color: #dc3545;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-top: -1rem;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Blokada cyfr "w locie" dla pól imion i nazwisk (tak jak na dashboardzie)
+        const nameInputs = document.querySelectorAll('input[name*="first_name"], input[name*="last_name"]');
+        nameInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[0-9!@#$%^&*()_+={}\[\]:;"'<>,.?\/\\|`~]/g, '');
+            });
+        });
+    });
+</script>
+{% endblock %}

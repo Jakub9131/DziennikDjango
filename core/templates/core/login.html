@@ -1,0 +1,74 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<style>
+    .login-card {
+        background: white;
+        border: none;
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        padding: 3rem;
+        width: 420px; /* Stała szerokość karty */
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-logo {
+        font-size: 3.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #374151;
+    }
+
+    .btn-login {
+        background-color: #6366f1;
+        border: none;
+        padding: 0.85rem;
+        font-weight: 700;
+        border-radius: 0.625rem;
+        color: white;
+        margin-top: 1rem;
+    }
+
+        .btn-login:hover {
+            background-color: #4f46e5;
+        }
+</style>
+
+<div class="login-card animate-fade-in">
+    <div class="login-header">
+        <span class="login-logo">📘</span>
+        <h2 class="fw-bold">E-Dziennik</h2>
+        <p class="text-muted">Zaloguj się do swojego konta</p>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger py-2 small border-0 mb-4">
+        Niepoprawny e-mail lub hasło.
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Adres E-mail</label>
+            <input type="email" name="username" class="form-control" placeholder="np. jan.kowalski@szkola.pl" required>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Hasło</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-login w-100 shadow">
+            Zaloguj się
+        </button>
+    </form>
+</div>
+{% endblock %}

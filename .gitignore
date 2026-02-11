@@ -1,0 +1,8 @@
+.vs/
+.vscode/
+bin/
+obj/
+*.vsidx
+venv/
+__pycache__/
+db.sqlite3

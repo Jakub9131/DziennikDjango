@@ -1,0 +1,140 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="fw-bold text-dark mb-0">{{ subject.name }} <span class="text-muted fw-normal">| {{ group.name }}</span></h2>
+        <p class="text-muted mb-0">Zarządzanie ocenami uczniów</p>
+    </div>
+    <a href="{% url 'teacher_panel' %}" class="btn btn-outline-secondary px-4 rounded-pill fw-bold shadow-sm">
+        <i class="bi bi-arrow-left me-2"></i>Powrót do listy klas
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead class="bg-light">
+                <tr class="text-muted small text-uppercase fw-bold">
+                    <th class="ps-4 py-3">Uczeń</th>
+                    <th>Oceny (kliknij ocenę, aby edytować)</th>
+                    <th class="text-end pe-4">Akcja</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td class="ps-4 py-3 fw-bold text-dark">{{ student.last_name }} {{ student.first_name }}</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for grade in grades %}
+                            {% if grade.student_id == student.id %}
+                            <button type="button"
+                                    class="badge border-0 {% if grade.value <= 2 %}bg-danger{% elif grade.value <= 4 %}bg-warning text-dark{% else %}bg-success{% endif %} shadow-sm px-3 py-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editGrade{{ grade.id }}">
+                                {{ grade.value }}
+                            </button>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-primary fw-bold px-3 shadow-sm py-2" data-bs-toggle="modal" data-bs-target="#addGrade{{ student.id }}">
+                            <i class="bi bi-plus-lg me-1"></i> OCENA
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% for student in students %}
+<div class="modal fade" id="addGrade{{ student.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_grade">
+                <input type="hidden" name="student_id" value="{{ student.id }}">
+                <div class="modal-header border-0 pt-4 px-4">
+                    <h5 class="fw-bold">Nowa ocena: {{ student.last_name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Stopień</label>
+                        <select name="value" class="form-select border-2" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5" selected>5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Komentarz</label>
+                        <input type="text" name="comment" class="form-control" placeholder="Np. Sprawdzian z ułamków">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">WSTAW OCENĘ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    {% for grade in grades %}
+        {% if grade.student_id == student.id %}
+<div class="modal fade" id="editGrade{{ grade.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="grade_id" value="{{ grade.id }}">
+                <div class="modal-header border-0 pt-4 px-4">
+                    <h5 class="fw-bold">Edycja oceny</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 text-center">
+                    <p class="text-muted small">Uczeń: {{ student.first_name }} {{ student.last_name }}</p>
+                    <div class="display-4 fw-bold text-primary mb-3">{{ grade.value }}</div>
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold small">Zmień stopień (obecnie: {{ grade.value }})</label>
+                        <select name="value" class="form-select border-2">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold small">Komentarz</label>
+                        <input type="text" name="comment" class="form-control" value="{{ grade.comment }}">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4 d-flex justify-content-between">
+                    <button type="submit" name="action" value="delete_grade" class="btn btn-outline-danger shadow-sm px-3" onclick="return confirm('Trwale usunąć tę ocenę?')">
+                        <i class="bi bi-trash me-1"></i> Usuń
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-light border me-1" data-bs-dismiss="modal">Anuluj</button>
+                        <button type="submit" name="action" value="edit_grade" class="btn btn-primary px-4 fw-bold">Zapisz zmiany</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+{% endblock %}
