@@ -13,7 +13,6 @@ from .forms import (
     AssignTeacherForm, StudentBasicForm, ParentBasicForm
 )
 
-# --- POMOCNICZE ---
 
 def role_required(role_name):
     def decorator(view_func):
@@ -25,7 +24,7 @@ def role_required(role_name):
         return _wrapped_view
     return decorator
 
-# --- ROUTER & ZMIANA HASŁA ---
+
 
 @login_required
 def dashboard_router(request):
@@ -53,7 +52,7 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, 'core/change_password.html', {'form': form})
 
-# --- PANELE RÓL (BRAKUJĄCE FUNKCJE) ---
+
 
 @role_required('student')
 def student_panel(request):
@@ -85,7 +84,6 @@ def parent_panel(request):
 
     return render(request, 'core/parent_dashboard.html', {'children': children})
 
-# --- PANEL ADMINA ---
 
 @role_required('admin')
 def admin_dashboard(request):
@@ -104,13 +102,11 @@ def admin_dashboard(request):
     students = User.objects.filter(role='student').select_related('class_group', 'parent').order_by('last_name')
     teachers = User.objects.filter(role='teacher').order_by('last_name')
 
-    # Filtrowanie serwerowe
     if student_q:
         students = students.filter(Q(last_name__icontains=student_q) | Q(first_name__icontains=student_q) | Q(email__icontains=student_q))
     if teacher_q:
         teachers = teachers.filter(Q(last_name__icontains=teacher_q) | Q(first_name__icontains=teacher_q) | Q(email__icontains=teacher_q))
 
-    # Inicjalizacja formularzy
     class_form = ClassGroupForm()
     subject_form = SubjectForm()
     teacher_form = TeacherCreationForm()
@@ -191,7 +187,6 @@ def admin_dashboard(request):
         'student_search': student_q, 'teacher_search': teacher_q
     })
 
-# --- AKCJE ADMINA (EDYCJA / USUWANIE) ---
 
 @role_required('admin')
 def edit_student_family(request, student_id):
@@ -273,8 +268,6 @@ def remove_assignment(request, assignment_id):
     assignment.delete()
     messages.success(request, "Przypisanie zostało usunięte.")
     return redirect('teacher_details', teacher_id=teacher_id)
-
-# --- WIDOKI NAUCZYCIELA ---
 
 @role_required('teacher')
 def class_grades_detail(request, class_id, subject_id):

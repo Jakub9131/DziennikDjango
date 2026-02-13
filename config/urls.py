@@ -6,11 +6,11 @@ from core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Logowanie i wylogowanie
+    
     path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     
-    # Strony dziennika
+    
     path('', views.dashboard_router, name='dashboard_router'),
     path('student/', views.student_panel, name='student_panel'),
     path('teacher/', views.teacher_panel, name='teacher_panel'),

@@ -6,10 +6,8 @@ def create_admin_account(apps, schema_editor):
     
     email = 'admin@szkola.pl'
     password = 'admin123'
-    # Django wciąż potrzebuje username pod maską, ale nie będzie on używany do logowania
     username = 'admin_root' 
 
-    # Teraz sprawdzamy po EMAILU, bo to on jest Twoim nowym identyfikatorem
     if not User.objects.filter(email=email).exists():
         User.objects.create(
             username=username,
@@ -23,7 +21,6 @@ def create_admin_account(apps, schema_editor):
 
 def remove_admin_account(apps, schema_editor):
     User = apps.get_model('core', 'User')
-    # Usuwamy po mailu, żeby było spójne
     User.objects.filter(email='admin@szkola.pl').delete()
 
 class Migration(migrations.Migration):

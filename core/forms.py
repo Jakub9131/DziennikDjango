@@ -3,14 +3,12 @@ from django.core.exceptions import ValidationError
 from .models import User, ClassGroup, Subject
 import re
 
-# --- POMOCNICZA FUNKCJA WALIDUJĄCA ---
 
 def validate_only_letters(value):
     """Sprawdza, czy pole zawiera tylko litery, spacje i myślniki."""
     if not re.match(r'^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-]+$', value):
         raise ValidationError("To pole może zawierać tylko litery.")
 
-# --- FORMULARZE ---
 
 class ClassGroupForm(forms.ModelForm):
     class Meta:

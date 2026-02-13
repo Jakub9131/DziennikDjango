@@ -58,7 +58,6 @@
 </div>
 
 <style>
-    /* Stylowanie formularzy generowanych przez as_p dla spójności z dashboardem */
     .custom-form-as-p p label {
         display: block;
         font-weight: 600;
@@ -98,7 +97,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Blokada cyfr "w locie" dla pól imion i nazwisk (tak jak na dashboardzie)
         const nameInputs = document.querySelectorAll('input[name*="first_name"], input[name*="last_name"]');
         nameInputs.forEach(input => {
             input.addEventListener('input', function() {

@@ -47,7 +47,7 @@ class SubjectAssignment(models.Model):
     class_group = models.ForeignKey(ClassGroup, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('subject', 'class_group') # Jedna klasa ma jednego nauczyciela od danego przedmiotu
+        unique_together = ('subject', 'class_group') 
 
     def __str__(self):
         return f"{self.subject.name} - {self.class_group.name} ({self.teacher.last_name})"
