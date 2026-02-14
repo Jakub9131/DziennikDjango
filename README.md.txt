@@ -9,8 +9,6 @@ venv\Scripts\activate
 
 pip install -r requirements.txt
 
-pip install django-environ
-
 [python manage.py migrate
 
 python manage.py seed_data]
