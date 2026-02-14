@@ -9,8 +9,16 @@ venv\Scripts\activate
 
 pip install -r requirements.txt
 
-python manage.py migrate
+pip install django-environ
 
-python manage.py seed_data
+[python manage.py migrate
+
+python manage.py seed_data]
 
 python manage.py runserver
+
+do wyczyszczenia:
+
+python manage.py flush
+
+python manage.py migrate core zero

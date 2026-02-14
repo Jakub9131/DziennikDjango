@@ -5,6 +5,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -63,6 +65,32 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+env = environ.Env()
+
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+DATABASES = {
+    'default': env.db(),
+}
+
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'defaultdb',
+        'USER': 'avnadmin',
+        'PASSWORD': '',
+        'HOST': 'dzienniknowy-jakubdb.l.aivencloud.com',
+        'PORT': '22843',
+        'CONN_MAX_AGE': 600,
+    }
+}
+""""
+
+DATABASES['default']['OPTIONS'] = {
+    'sslmode': 'require',
+}
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -73,7 +101,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
+"""
 
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
